@@ -366,7 +366,7 @@ class DataTrainingArguments:
     # controlprefix: Optional[str] = field(
     #     default="yes", metadata={"help": "The control mode"}
     # )
-
+    #changed lack size @li
     block_size: int = field(
         default=-1,
         metadata={
@@ -467,6 +467,10 @@ def get_dataset(
             dataset =  LineByLineWithWeightTextDataset(tokenizer=tokenizer, file_path=file_path,
                                                    block_size=args.block_size, bos_tok=tokenizer.bos_token,
                                                      eos_tok=tokenizer.eos_token)
+        elif args.task_mode == 'gen_lyrics': #@li
+            dataset = TextDataset(tokenizer=tokenizer, file_path=file_path, block_size=args.block_size, overwrite_cache=args.overwrite_cache)
+            print (dataset)
+            #dataset = LineByLineTextDataset(tokenizer=tokenizer, file_path=file_path, block_size=args.block_size)
         else:
             return LineByLineTextDataset(tokenizer=tokenizer, file_path=file_path, block_size=args.block_size)
 
@@ -617,7 +621,7 @@ def main():
         )
 
     if data_args.block_size <= 0:
-        data_args.block_size = tokenizer.max_len
+        data_args.block_size = tokenizer.model_max_length - 10
         # Our input block size will be the max possible for the model
     else:
         data_args.block_size = min(data_args.block_size, tokenizer.max_len)
@@ -853,16 +857,21 @@ def main():
     #################LOADING DATASETS ###########################
     ##############################################################
 
-    train_dataset = (
-        get_dataset(data_args, tokenizer=tokenizer, cache_dir=model_args.cache_dir, training_args=training_args,
-                    finetune_mode=(model_args.tuning_mode == 'finetune')) #if training_args.do_train else None
-    )
-    eval_dataset = (
-        get_dataset(data_args, tokenizer=tokenizer, evaluate=True, cache_dir=model_args.cache_dir,
-                    training_args=training_args, finetune_mode=(model_args.tuning_mode == 'finetune') )
-        if training_args.do_eval
-        else None
-    )
+    #@li
+    train_dataset = get_dataset(data_args, tokenizer=tokenizer,cache_dir=model_args.cache_dir, training_args=training_args,finetune_mode=(model_args.tuning_mode == 'finetune')) #if training_args.do_train else None
+    eval_dataset = get_dataset(data_args, tokenizer=tokenizer, evaluate=True, cache_dir=model_args.cache_dir,training_args=training_args, finetune_mode=(model_args.tuning_mode == 'finetune') ) if training_args.do_eval else None
+    #data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability)
+    #original below:
+    # train_dataset = (
+    #     get_dataset(data_args, tokenizer=tokenizer, cache_dir=model_args.cache_dir, training_args=training_args,
+    #                 finetune_mode=(model_args.tuning_mode == 'finetune')) #if training_args.do_train else None
+    # )
+    # eval_dataset = (
+    #     get_dataset(data_args, tokenizer=tokenizer, evaluate=True, cache_dir=model_args.cache_dir,
+    #                 training_args=training_args, finetune_mode=(model_args.tuning_mode == 'finetune') )
+    #     if training_args.do_eval
+    #     else None)
+
     if config.model_type == "xlnet":
         data_collator = DataCollatorForPermutationLanguageModeling(
             tokenizer=tokenizer,
@@ -917,8 +926,13 @@ def main():
             data_collator = DataCollatorForText2DataLanguageModeling(
                 tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability
             )
-        elif data_args.task_mode == 'gen_data':
+        elif data_args.task_mode == 'gen_data': 
             data_collator = DataCollatorForWeightedLanguageModeling(
+                tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability
+            )
+
+        elif data_args.task_mode == 'gen_lyrics': #@li
+            data_collator = DataCollatorForLanguageModeling(
                 tokenizer=tokenizer, mlm=data_args.mlm, mlm_probability=data_args.mlm_probability
             )
         else:

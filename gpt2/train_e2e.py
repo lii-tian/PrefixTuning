@@ -9,12 +9,12 @@ if not sys.warnoptions:
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='data2text E2E training args.')
-    parser.add_argument('--mode', type=str, default='data2text', help='')
+    parser = argparse.ArgumentParser(description='lyrics generation.')
+    parser.add_argument('--mode', type=str, default='gen_lyrics', help='') #@li
     parser.add_argument('--tuning_mode', type=str, default='prefixtune', help='')
     parser.add_argument('--optim_prefix', type=str, default='yes', help='')
     parser.add_argument('--preseqlen', type=int, default=10, help='')
-    parser.add_argument('--prefix_mode', type=str, default='activation', help='')
+    parser.add_argument('--prefix_mode', type=str, default='embedding', help='')
     parser.add_argument('--format_mode', type=str, default='cat', help='')
 
     parser.add_argument('--dir_name', type=str, default=None, help='')
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     parser.add_argument('--matching_objective', type=str, default='kl', help='kl or logits')
 
     # Added by MX
-    parser.add_argument('--cache_dir', type=str, default='/u/scr/xlisali/contrast_LM/transformers/examples/control', help='cache dir')
+    parser.add_argument('--cache_dir', type=str, default='/Users/lizi/Desktop/nlp/PrefixTuning/gpt2/cache', help='cache dir') #@li - change to absolute path on aws
     parser.add_argument('--use_custom_teacher_dropout', type=str, default='no', help='')
 
 
@@ -83,7 +83,7 @@ if __name__ == '__main__':
         load_prefix_model = False
 
     assert  args.mode in ['data2text', 'triples', 'webnlg', 'writingPrompts', 'cnndm', 'xsum', 'sentiment', 'topic',
-                          'classify-sentiment', 'classify-topic']
+                          'classify-sentiment', 'classify-topic', 'gen_lyrics'] #@li
 
     assert args.objective_mode in [0, 1, 2, 3, 4]
     # 0 means the regular token level objective, which is sum / output_len
@@ -230,6 +230,10 @@ if __name__ == '__main__':
         folder_name = "xsum_models/"
         assert args.optim_prefix == 'yes'
 
+    elif args.mode == 'gen_lyrics': #@li
+        TRAIN_FILE = "/Users/lizi/Desktop/nlp/PrefixTuning/gpt2/data/train_baby.txt"
+        TEST_FILE = "/Users/lizi/Desktop/nlp/PrefixTuning/gpt2/data/test_baby.txt"
+        folder_name = "gen_lyrics/"
     if not os.path.isdir(folder_name):
         os.mkdir(folder_name)
 
@@ -268,7 +272,7 @@ if __name__ == '__main__':
                      + 'w={}_'.format(args.weight_decay) + 's={}'.format(args.seed) + '_r={}'.format(args.init_random[:1]) +\
                      '_m={}'.format(args.mid_dim)
     else:
-        Model_FILE = dir_name
+        Model_FILE = args.dir_name
 
     if args.notes is not None:
         Model_FILE += '_{}'.format(args.notes)

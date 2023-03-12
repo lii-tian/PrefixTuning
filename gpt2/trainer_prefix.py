@@ -807,6 +807,7 @@ class Trainer_Prefix:
                     steps_trained_in_current_epoch -= 1
                     epoch_pbar.update(1)
                     continue
+                
 
                 tr_loss += self.training_step(model, inputs)
 
@@ -1211,6 +1212,7 @@ class Trainer_Prefix:
             inputs['control_code'] = torch.index_select(k, 0, prompt_lab_)
             del inputs['prompt_lab']
 
+        #print (f'******{inputs}**********')
         outputs = model(**inputs, gpt2_model=gpt2_model)
         # Save past state if it exists
         if self.args.past_index >= 0:

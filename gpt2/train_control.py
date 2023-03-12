@@ -9,7 +9,6 @@ class PrefixTuning(GPT2PreTrainedModel):
     def __init__(self, config, model_gpt2, optim_prefix=False, preseqlen=5, use_infix=False, deep_param=False):
         super().__init__(config)
         print('under the PrefixTuning model')
-
         self.match_n_layer = config.n_layer
         self.match_n_head = config.n_head
         self.match_n_embd = config.n_embd // config.n_head
@@ -400,7 +399,6 @@ class PrefixEmbTuning(GPT2PreTrainedModel):
     """Classification Head for  transformer encoders"""
     def __init__(self, config, model_gpt2, optim_prefix=False, preseqlen=5, use_infix=False):
         super().__init__(config)
-
         print('under the PrefixEmbTuning model')
 
         self.match_n_layer = config.n_layer
@@ -508,7 +506,8 @@ class PrefixEmbTuning(GPT2PreTrainedModel):
             print(param.shape)
             total_param += param.numel()
         print('total param is {}'.format(total_param))
-
+        #print('n_embd is {}'.format(self.n_embd))
+        #print('match_n_embd is {}'.format(self.match_n_embd))
 
         ############################################################################
 
