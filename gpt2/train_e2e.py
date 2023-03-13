@@ -64,7 +64,7 @@ if __name__ == '__main__':
     parser.add_argument('--matching_objective', type=str, default='kl', help='kl or logits')
 
     # Added by MX
-    parser.add_argument('--cache_dir', type=str, default='/Users/lizi/Desktop/nlp/PrefixTuning/gpt2/cache', help='cache dir') #@li - change to absolute path on aws
+    parser.add_argument('--cache_dir', type=str, default='/home/ubuntu/PrefixTuning/gpt2/cache', help='cache dir') #@li - change to absolute path on aws
     parser.add_argument('--use_custom_teacher_dropout', type=str, default='no', help='')
 
 
@@ -231,8 +231,10 @@ if __name__ == '__main__':
         assert args.optim_prefix == 'yes'
 
     elif args.mode == 'gen_lyrics': #@li
-        TRAIN_FILE = "/Users/lizi/Desktop/nlp/PrefixTuning/gpt2/data/train_baby.txt"
-        TEST_FILE = "/Users/lizi/Desktop/nlp/PrefixTuning/gpt2/data/test_baby.txt"
+        TRAIN_FILE = "/home/ubuntu/PrefixTuning/gpt2/data/train.txt"
+        TEST_FILE = "/home/ubuntu/PrefixTuning/gpt2/data/valid.txt"
+        #TRAIN_FILE = "/Users/lizi/Desktop/nlp/PrefixTuning/gpt2/data/train_baby.txt"
+        #TEST_FILE = "/Users/lizi/Desktop/nlp/PrefixTuning/gpt2/data/test_baby.txt"
         folder_name = "gen_lyrics/"
     if not os.path.isdir(folder_name):
         os.mkdir(folder_name)

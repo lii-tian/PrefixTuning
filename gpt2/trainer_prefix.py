@@ -752,6 +752,7 @@ class Trainer_Prefix:
         self.global_step = 0
         self.epoch = 0
         self.total_flos = 0
+        #self.metrics = [] #@li
         epochs_trained = 0
         steps_trained_in_current_epoch = 0
         # Check if continuing training from a checkpoint
@@ -948,6 +949,7 @@ class Trainer_Prefix:
 
             if self.args.evaluation_strategy == EvaluationStrategy.EPOCH:
                 metrics = self.evaluate()
+                self.metrics.append(metrics)
                 self._report_to_hp_search(trial, epoch, metrics)
 
             if self.args.tpu_metrics_debug or self.args.debug:

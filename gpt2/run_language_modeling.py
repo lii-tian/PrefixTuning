@@ -30,9 +30,16 @@ from transformers.file_utils import cached_path
 
 import glob
 
+import datasets
+import evaluate
+from datasets import load_metric
+from metric import *
+
 
 path = os.path.abspath(transformers.__file__)
 print(path)
+
+from transformers.trainer_utils import EvaluationStrategy
 
 from transformers import (
     CONFIG_MAPPING,
@@ -501,6 +508,15 @@ def main():
 
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+    #modify traning_args @li
+    training_args.per_device_train_batch_size = 2  
+    #training_args.num_train_epochs= 2
+    training_args.save_steps=1000
+    training_args.logging_steps=100 
+    training_args.report_to='tensorboard'
+    training_args.logging_dir="./tblog/prefix"
+    training_args.evaluation_strategy=EvaluationStrategy.STEPS
+
 
 
     if data_args.eval_data_file is None and training_args.do_eval:
@@ -944,7 +960,7 @@ def main():
         # )
 
     if (model_args.tuning_mode == 'prefixtune'):
-
+        #added compute_metrics across all trainer @li
         if data_args.distill == 'yes':
 
             trainer = Trainer_Prefix(
@@ -956,12 +972,13 @@ def main():
                 train_dataset=train_dataset,
                 eval_dataset=eval_dataset,
                 data_collator=data_collator,
+                compute_metrics=compute_metrics,
                 task_mode =data_args.task_mode,
                 use_dropout=(model_args.use_dropout == 'yes'),
                 distill = True,
                 matching_objective=data_args.matching_objective,
                 finetuned_gpt2=finetuned_gpt2
-            )
+            ) #preprocess_logits_for_metrics=preprocess_logits_for_metrics,
 
         else:
             trainer = Trainer_Prefix(
@@ -973,9 +990,10 @@ def main():
                 train_dataset=train_dataset,
                 eval_dataset=eval_dataset,
                 data_collator=data_collator,
+                compute_metrics=compute_metrics,
                 task_mode =data_args.task_mode,
                 use_dropout=(model_args.use_dropout == 'yes'),
-            )
+            ) #preprocess_logits_for_metrics=preprocess_logits_for_metrics,
 
     else:
 
@@ -986,8 +1004,9 @@ def main():
             data_collator=data_collator,
             train_dataset=train_dataset,
             eval_dataset=eval_dataset,
-            prediction_loss_only=True,
-        )
+            compute_metrics=compute_metrics,
+            preprocess_logits_for_metrics=preprocess_logits_for_metrics,
+        )#prediction_loss_only=True,
 
     # Training
 
@@ -1004,7 +1023,21 @@ def main():
         if trainer.is_world_master():
             tokenizer.save_pretrained(training_args.output_dir)
 
-        trainer.train(model_path=model_path)
+        #added @lii
+        train_result = trainer.train(model_path=model_path)
+
+        result = trainer.save_model()  # Saves the tokenizer too for easy upload
+        tokenizer.save_pretrained(training_args.output_dir)
+        # metrics = train_result.metrics
+
+        # max_train_samples = (
+        #     data_args.max_train_samples if data_args.max_train_samples is not None else len(train_dataset)
+        # )
+        # metrics["train_samples"] = min(max_train_samples, len(train_dataset))
+
+        # trainer.log_metrics("train", metrics)
+        # trainer.save_metrics("train", metrics)
+
 
         if 'lowdata' not in training_args.output_dir:
             trainer.save_model()
@@ -1039,6 +1072,25 @@ def main():
                     writer.write("%s = %s\n" % (key, str(result[key])))
 
         results.update(result)
+
+    # #check @li
+    # if training_args.do_eval:
+    #     logger.info("*** Evaluate ***")
+
+    #     metrics = trainer.evaluate()
+
+    #     max_eval_samples = data_args.max_eval_samples if data_args.max_eval_samples is not None else len(eval_dataset)
+    #     metrics["eval_samples"] = min(max_eval_samples, len(eval_dataset))
+    #     try:
+    #         perplexity = math.exp(metrics["eval_loss"])
+    #     except OverflowError:
+    #         perplexity = float("inf")
+    #     metrics["perplexity"] = perplexity
+
+    #     trainer.log_metrics("eval", metrics)
+    #     trainer.save_metrics("eval", metrics)
+
+
 
 
     if 'lowdata' in training_args.output_dir:
