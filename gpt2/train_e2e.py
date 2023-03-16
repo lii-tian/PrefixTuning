@@ -355,13 +355,12 @@ if __name__ == '__main__':
         --do_eval \
         --line_by_line \
         --save_total_limit 1 \
-        --overwrite_output_dir \
         --task_mode {} \
         --eval_data_file={}  \
         --tuning_mode {} --logging_dir {} \
         --train_embs no ".format(Model_FILE, OLD_MODEL, OLD_MODEL, args.bsz, args.bsz, args.epoch, TRAIN_FILE, args.mode, TEST_FILE,
                                  args.tuning_mode, logging_dir)
-
+    #--overwrite_output_dir \
     COMMANDLINE += app
 
     if load_prefix_model:

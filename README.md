@@ -30,6 +30,7 @@ they are set to default of good hyperparameters, and can be used to tune hyperpa
 ## Setup:
 
 ``cd transformer; pip install -e .``
+# python=3.7.15=h2782a2a_0_cpython  removed from env lists
 
 -----------------------------------------------------
 ## Train via prefix-tuning:
@@ -37,7 +38,7 @@ they are set to default of good hyperparameters, and can be used to tune hyperpa
 ```python
 cd gpt2;
 
-python train_e2e.py --optim_prefix yes --preseqlen 5 --epoch 5 --learning_rate 0.00005 --mode webnlg --bsz 5 --seed 101
+python train_e2e.py --optim_prefix yes --preseqlen 5 --epoch 5 --learning_rate 0.00005 --mode gen_lyrics --bsz 5 --seed 101
 ```
 
 

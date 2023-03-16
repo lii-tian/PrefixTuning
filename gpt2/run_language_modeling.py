@@ -511,11 +511,11 @@ def main():
     #modify traning_args @li
     training_args.per_device_train_batch_size = 2  
     #training_args.num_train_epochs= 2
-    training_args.save_steps=1000
-    training_args.logging_steps=100 
+    training_args.save_steps=2000
+    training_args.logging_steps=500 
     training_args.report_to='tensorboard'
-    training_args.logging_dir="./tblog/prefix"
-    training_args.evaluation_strategy=EvaluationStrategy.STEPS
+    training_args.logging_dir="./tblog/prefix_new"
+    training_args.eval_steps=500
 
 
 
